@@ -24,6 +24,10 @@ Bonus function:
 - [ ] Give User hint when long time no activity 
 
 
+## Wireframes
+
+![](sweetcrush.jpg)
+
 ## Architechture & Technologies
 
 This project will be implemented with the following technologies:
