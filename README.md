@@ -1,4 +1,4 @@
-# Sweet Crush
+# Diamond Crush
 
 <!-- _An online match-three puzzle game_ -->
 
@@ -6,12 +6,12 @@
 
 ## Background and Overview
 
-Sweet Crush is a match-three puzzle game. 
+Diamond Crush is a match-three puzzle game. 
 
 
 ## Functionality and MVP
 
-In Sweet Crush, users will be able to 
+In Diamond Crush, users will be able to 
 
 - [ ] See a populated board of sweets 
 - [ ] Eliminate three sweets by swapping certain two sweets
@@ -26,7 +26,7 @@ Bonus function:
 
 ## Wireframes
 
-![](sweetcrush.jpg)
+![](diamondcrush.jpg)
 
 ## Architechture & Technologies
 
@@ -40,7 +40,7 @@ In addition to the webpack entry file, there will be other scripts involved in t
 
 `board.js`: this script will handle the logic for creating and updating the necessary DOM elements.
 
-`sweets.js`: this script will house the swaps logic for the sweets.
+`diamonds.js`: this script will house the swaps logic for the sweets.
 
 `audio.js`: this script will handle the audio logic and the creation of AudioEvents based on the input parameters outlined above.
   
@@ -60,7 +60,7 @@ In addition to the webpack entry file, there will be other scripts involved in t
 - use canvas and code game logic
 #### Day 4 - Nov 1
 
-- collision detection, candy elimination and new candy drop
+- collision detection, diamond elimination and new diamond drop
 #### Day 5 - Nov 2
 
 - winner detection and shuffle
