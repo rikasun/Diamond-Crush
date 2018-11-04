@@ -12,15 +12,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rikasun/JS-project.git"
+    "url": "git+https://github.com/rikasun/Diamond-Crush.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/rikasun/JS-project/issues"
+    "url": "https://github.com/rikasun/Diamond-Crush/issues"
   },
-  "homepage": "https://github.com/rikasun/JS-project#readme",
+  "homepage": "https://github.com/rikasun/Diamond-Crush#readme",
   "devDependencies": {
     "webpack": "^4.23.1",
     "webpack-cli": "^3.1.2"

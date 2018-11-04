@@ -2,7 +2,7 @@
 
 <!-- _An online match-three puzzle game_ -->
 
-[Live Site]()
+[Live Site](https://rikasun.github.io/Diamond-Crush/)
 
 ## Background and Overview
 
