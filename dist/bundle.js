@@ -130,7 +130,7 @@ class Board {
    }
 
   randomColor(){
-    const colors = ["red", "yellow", "orange", "blue", "green", "purple"];
+    const colors = ["red", "yellow", "orange", "lime", "fuchsia", "blue"];
     const ranIndex = Math.floor(Math.random() * colors.length);
     return colors[ranIndex];
   }
@@ -162,12 +162,11 @@ class Board {
         }
       }
     }
-    // return matches;
+  
     for (let m=0; m<matches.length; m++){
       matches[m].color = "black";
       matches[m].exist = false;
     }
-    // console.log(matches);
 
     setTimeout(() => this.shiftBoard(), 100);
   }
@@ -180,7 +179,7 @@ class Board {
     // debugger
     if (xNew > 6 || yNew > 6){
       if (path.length > 2){
-        return matches = matches.concat(path);
+        return matches.concat(path);
       } else {
         return matches;
       }
@@ -189,7 +188,7 @@ class Board {
     if (diamond.color === nextDiamond.color){
       return this.traverseDownRight(matches, explored, nextDiamond, dir, path);
     } else if (path.length > 2){
-      return matches = matches.concat(path);
+       return matches.concat(path);
     } else {
       return matches;
     }
@@ -199,11 +198,9 @@ class Board {
 
   shiftBoard() {
     // debugger
-    // let explored = [];
     for (let i=0; i<7; i++){
       for (let j=0; j<7; j++){
         let diamond = this.board[i][j];
-        // explored.push(diamond);
         if (diamond.exist === false) {
           // debugger
           while (diamond.rowIdx >=1) {
@@ -220,28 +217,33 @@ class Board {
     }
   }
 
-  findValidSwaps() {
-    for (let i=0; i<7; i++){
-      for (let j=0; j<7; j++){
-        // try to swap 
-        // findMatches();
-        // if find matches
-        // there is valid swaps
-      }
-    }
-  }
+  // findSwaps() {
+  //   const dirs = [[0, 1], [1, 0], [-1, 0], [0, -1]];
+  //   for (let j=0; j<7; j++){
+  //     for (let i=0; i<7; i++){
+  //       let diamond = this.board[i][j];
+  //       for (let d=0; d<4; d++){
+  //         this.isValid(diamond, dirs[d])
+  //       }
+  //     }
+  //   }
+  // }
 
-  swap(x1, y1, x2, y2){
-    color1 = this.board[x1][y1].color;
-    color2 = this.board[x2][y2].color;
-    if ( 
-      (0<=x1===x2-1<=5) && (y1===y2) ||
-      (0<=y1===y2-1<= 5) && (x1 === x2)
-       ){
-      this.board[x1][y1].color = color2;
-      this.board[x2][y2].color = color2;
-       }  
-  }
+  // isValid(diamond, dir){
+
+  // }
+
+  // swap(x1, y1, x2, y2){
+  //   color1 = this.board[x1][y1].color;
+  //   color2 = this.board[x2][y2].color;
+  //   if ( 
+  //     (0<=x1===x2-1<=5) && (y1===y2) ||
+  //     (0<=y1===y2-1<= 5) && (x1 === x2)
+  //      ){
+  //     this.board[x1][y1].color = color2;
+  //     this.board[x2][y2].color = color2;
+  //      }  
+  // }
 
 
 
@@ -261,7 +263,7 @@ class Board {
       ctx.lineTo(7 * a + p, x);
     }
 
-    ctx.strokeStyle = "black";
+    ctx.strokeStyle = "lightsteelblue";
     ctx.stroke();
   }
   
@@ -293,7 +295,6 @@ class Board {
       
     
     canvasEl.addEventListener('mouseup', event => {
-      // this.board[this.oldX][this.oldY].size = 20;
       
       this.newY = parseInt((event.offsetX - p) / 65);
       this.newX = parseInt((event.offsetY - 100) / 65); 
@@ -305,22 +306,19 @@ class Board {
       this.board[this.oldX][this.oldY].color = color2
       
       setTimeout(()=> this.findMatches(), 100);
-      
-      // setTimeout(()=> this.shiftBoard(), 100);
      
-      }) 
-    
+    })  
   }
   
-    // keeps drawing 60 times a second so its animation
+    
     drawDiamonds(ctx) {
-      // console.log("draw board");
       for (let j = 0; j < 7; j ++) {    
         for (let i = 0; i < 7; i ++ ) {
           this.board[i][j].drawDiamond(ctx);
         }
       }
     } 
+
 }
 
 
