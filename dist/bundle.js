@@ -117,7 +117,7 @@ class Board {
     return false}
 
   traverseUpLeft(diamond, dir, count){
-    debugger
+    // debugger
     if (count === 3) return true;
     const xNew = diamond.rowIdx + dir[0];
     const yNew = diamond.colIdx + dir[1];
@@ -178,8 +178,8 @@ class Board {
     path.push(diamond);
     const xNew = diamond.rowIdx+dir[0];
     const yNew = diamond.colIdx+dir[1];
-    debugger
-    console.log('test')
+    // debugger
+    // console.log('test')
     if (xNew > 6 || yNew > 6){
       if (path.length > 2){
         return matches.concat(path);
@@ -277,8 +277,11 @@ class Board {
     let color2;
     const p = 400;
 
-    canvasEl.addEventListener('mousedown touchstart', event => {
-      
+    // var clickEvent = ('touchstart' in window ? 'touchstart' :
+    //   'mousedown');
+    canvasEl.addEventListener('mousedown', event => {
+      // event.stopPropagation();
+      // event.preventDefault();
       this.oldY = parseInt((event.offsetX - p) / 65);
       this.oldX = parseInt((event.offsetY - 100) / 65);
       // this.board[this.oldX][this.oldY].size = 25
@@ -297,7 +300,9 @@ class Board {
     })
       
     
-    canvasEl.addEventListener('mouseup touchend', event => {
+    canvasEl.addEventListener('mouseup', event => {
+      // event.stopPropagation();
+      // event.preventDefault();
       
       this.newY = parseInt((event.offsetX - p) / 65);
       this.newX = parseInt((event.offsetY - 100) / 65); 
