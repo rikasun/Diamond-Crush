@@ -97,158 +97,158 @@ const Diamond = __webpack_require__(/*! ./diamond */ "./lib/diamond.js");
 
 
 class Board {
-  constructor() {
+  constructor(ctx) {
     this.board = Array.from(Array(7), () => new Array(7));
     this.oldX = 0;
     this.oldY = 0;
     this.newX = 0;
-    this.newY = 0;  
+    this.newY = 0;
+    this.ctx = ctx;
     this.addDiamonds();
     this.attachEvent();
   }
 
-
-  isMatch(diamond){
+  isMatch(diamond) {
     const dirs = [[-1, 0], [0, -1]];
     for (let i = 0; i < 2; i++) {
       const match = this.traverseUpLeft(diamond, dirs[i], 1);
       if (match) return true;
     }
-    return false}
+    return false;
+  }
 
-  traverseUpLeft(diamond, dir, count){
+  // When populating the board, ensure there are no matches
+  traverseUpLeft(diamond, dir, count) {
     // debugger
     if (count === 3) return true;
     const xNew = diamond.rowIdx + dir[0];
     const yNew = diamond.colIdx + dir[1];
     if (xNew < 0 || yNew < 0) return false;
-    
+
     const nextDiamond = this.board[xNew][yNew];
     if (diamond.color === nextDiamond.color) {
-      return this.traverseUpLeft(nextDiamond, dir, count + 1)
+      return this.traverseUpLeft(nextDiamond, dir, count + 1);
     } else {
-      return false
+      return false;
     }
-   }
+  }
 
-  randomColor(){
+  randomColor() {
     const colors = ["red", "yellow", "orange", "lime", "fuchsia", "blue"];
     const ranIndex = Math.floor(Math.random() * colors.length);
     return colors[ranIndex];
   }
 
-  addDiamonds() {  
-      for (var j = 0; j < 7; j++) {
-        for (var i = 0; i < 7; i++) {
-          let randColor = this.randomColor();
-          let diamond = new Diamond(j, i, 20, randColor);
-          this.board[i][j] = diamond;
-          while (this.isMatch(diamond)) {
-            diamond.color = this.randomColor();
-          }       
+  addDiamonds() {
+    for (var j = 0; j < 7; j++) {
+      for (var i = 0; i < 7; i++) {
+        let randColor = this.randomColor();
+        let diamond = new Diamond(j, i, 20, randColor);
+        this.board[i][j] = diamond;
+        while (this.isMatch(diamond)) {
+          diamond.color = this.randomColor();
         }
       }
+    }
   }
 
-  findMatches(){
+  // When user is playing game - called after swaps
+  findMatches() {
     let matches = [];
     const explored = [];
-    const dirs = [[1,0],[0,1]];
-    for (let j =0; j<7; j++){
-      for (let i=0; i<7; i++){
+    const dirs = [[1, 0], [0, 1]];
+    for (let i = 0; i < 7; i++) {
+      for (let j = 0; j < 7; j++) {
         let diamond = this.board[i][j];
-        if (!explored.includes(diamond)){
-          for (let d=0; d<2; d++){
-            matches = this.traverseDownRight(matches, explored, diamond, dirs[d]);
+        if (!explored.includes(diamond)) {
+          for (let d = 0; d < 2; d++) {
+            matches = this.traverseDownRight(
+              matches,
+              explored,
+              diamond,
+              dirs[d]
+            );
           }
         }
       }
     }
-  
-    for (let m=0; m<matches.length; m++){
-      matches[m].color = "black";
-      matches[m].exist = false;
-    }
 
-    setTimeout(() => this.shiftBoard(), 100);
+    // console.log(matches);
+
+    // for (let m = 0; m < matches.length; m++) {
+    //   matches[m].color = "black";
+    //   matches[m].exist = false;
+    //   matches[m].drawDiamond(this.ctx);
+    // }
+
+    this.shiftBoard(matches);
   }
 
-  traverseDownRight(matches, explored, diamond, dir, path=[]){
+  traverseDownRight(matches, explored, diamond, dir, path = []) {
+    // debugger;
     explored.push(diamond);
     path.push(diamond);
-    const xNew = diamond.rowIdx+dir[0];
-    const yNew = diamond.colIdx+dir[1];
+    if (path.length > 2) {
+      // console.log(path);
+    }
+    const xNew = diamond.rowIdx + dir[0];
+    const yNew = diamond.colIdx + dir[1];
     // debugger
-    // console.log('test')
-    if (xNew > 6 || yNew > 6){
-      if (path.length > 2){
+
+    if (xNew > 6 || yNew > 6) {
+      if (path.length > 2) {
         return matches.concat(path);
       } else {
         return matches;
       }
     }
-    let nextDiamond = this.board[xNew][yNew]
-    if (diamond.color === nextDiamond.color){
+    let nextDiamond = this.board[xNew][yNew];
+    if (diamond.color === nextDiamond.color) {
       return this.traverseDownRight(matches, explored, nextDiamond, dir, path);
-    } else if (path.length > 2){
-       return matches.concat(path);
+    } else if (path.length > 2) {
+      return matches.concat(path);
     } else {
       return matches;
     }
   }
 
-  removeMatches() {}
-
-  shiftBoard() {
-    // debugger
-    for (let i=0; i<7; i++){
-      for (let j=0; j<7; j++){
-        let diamond = this.board[i][j];
-        if (diamond.exist === false) {
-          // debugger
-          while (diamond.rowIdx >=1) {
-            const xNew = diamond.rowIdx - 1;
-            const yNew = diamond.colIdx;
-            const nextDiamond = this.board[xNew][yNew]
-            diamond.color = nextDiamond.color;
-            diamond.exist = true;
-            diamond.rowIdx -=1
-          }
-          this.board[0][j].color = this.randomColor();
-        }
-      }   
-    }
-  }
-
-  // findSwaps() {
-  //   const dirs = [[0, 1], [1, 0], [-1, 0], [0, -1]];
-  //   for (let j=0; j<7; j++){
-  //     for (let i=0; i<7; i++){
+  // shiftBoard() {
+  //   // debugger
+  //   for (let i = 0; i < 7; i++) {
+  //     for (let j = 0; j < 7; j++) {
   //       let diamond = this.board[i][j];
-  //       for (let d=0; d<4; d++){
-  //         this.isValid(diamond, dirs[d])
+  //       if (diamond.exist === false) {
+  //         // debugger
+  //         while (diamond.rowIdx >= 1) {
+  //           const xNew = diamond.rowIdx - 1;
+  //           const yNew = diamond.colIdx;
+  //           const nextDiamond = this.board[xNew][yNew];
+  //           diamond.color = nextDiamond.color;
+  //           diamond.exist = true;
+  //           diamond.rowIdx -= 1;
+  //         }
+  //         this.board[0][j].color = this.randomColor();
   //       }
   //     }
   //   }
   // }
 
-  // isValid(diamond, dir){
+  shiftBoard(matches) {
+    matches.forEach(diamond => {
+      // debugger;
+      while (diamond.rowIdx >= 1) {
+        const xNew = diamond.rowIdx - 1;
+        const yNew = diamond.colIdx;
+        const nextDiamond = this.board[xNew][yNew];
+        diamond.color = nextDiamond.color;
 
-  // }
-
-  // swap(x1, y1, x2, y2){
-  //   color1 = this.board[x1][y1].color;
-  //   color2 = this.board[x2][y2].color;
-  //   if ( 
-  //     (0<=x1===x2-1<=5) && (y1===y2) ||
-  //     (0<=y1===y2-1<= 5) && (x1 === x2)
-  //      ){
-  //     this.board[x1][y1].color = color2;
-  //     this.board[x2][y2].color = color2;
-  //      }  
-  // }
-
-
+        diamond.rowIdx -= 1;
+        diamond.drawDiamond(this.ctx);
+      }
+      this.board[0][diamond.colIdx].color = this.randomColor();
+      this.board[0][diamond.colIdx].drawDiamond(this.ctx);
+    });
+  }
 
   drawBoard(ctx) {
     //length of a square
@@ -269,64 +269,39 @@ class Board {
     ctx.strokeStyle = "lightsteelblue";
     ctx.stroke();
   }
-  
-  attachEvent(){
+
+  attachEvent() {
     const canvasEl = document.getElementsByTagName("canvas")[0];
-    const ctx = canvasEl.getContext("2d");
-    let color1;
-    let color2;
+    // const ctx = canvasEl.getContext("2d");
     const p = 400;
 
-    // var clickEvent = ('touchstart' in window ? 'touchstart' :
-    //   'mousedown');
-    canvasEl.addEventListener('mousedown', event => {
-      // event.stopPropagation();
-      // event.preventDefault();
+    canvasEl.addEventListener("mousedown", event => {
       this.oldY = parseInt((event.offsetX - p) / 65);
       this.oldX = parseInt((event.offsetY - 100) / 65);
-      // this.board[this.oldX][this.oldY].size = 25
-      console.log([parseInt((event.offsetY - 100) / 65), parseInt((event.offsetX - p) / 65)])
-      
-      // ctx.strokeStyle = "black";
-      // ctx.beginPath();
-      // ctx.moveTo(this.oldX * 65 + 130, this.oldY * 65 + 130);
-    })
-    
-    canvasEl.addEventListener('mousemove', event => {
-      
-      // ctx.lineTo(this.oldX * 65 + 130 + event.clientX, this.oldY * 65 + 130 + event.clientY);
-      // ctx.stroke();
-      // ctx.closePath();
-    })
-      
-    
-    canvasEl.addEventListener('mouseup', event => {
-      // event.stopPropagation();
-      // event.preventDefault();
-      
-      this.newY = parseInt((event.offsetX - p) / 65);
-      this.newX = parseInt((event.offsetY - 100) / 65); 
-      console.log([parseInt((event.offsetY - 100) / 65), parseInt((event.offsetX - p) / 65)])
-      
-      color1 = this.board[this.oldX][this.oldY].color
-      color2 = this.board[this.newX][this.newY].color
-      this.board[this.newX][this.newY].color = color1
-      this.board[this.oldX][this.oldY].color = color2
-      
-      setTimeout(()=> this.findMatches(), 100);
-     
-    })  
-  }
-  
-    
-    drawDiamonds(ctx) {
-      for (let j = 0; j < 7; j ++) {    
-        for (let i = 0; i < 7; i ++ ) {
-          this.board[i][j].drawDiamond(ctx);
-        }
-      }
-    } 
+    });
 
+    canvasEl.addEventListener("mouseup", event => {
+      this.newY = parseInt((event.offsetX - p) / 65);
+      this.newX = parseInt((event.offsetY - 100) / 65);
+
+      let color1 = this.board[this.oldX][this.oldY].color;
+      let color2 = this.board[this.newX][this.newY].color;
+      this.board[this.newX][this.newY].color = color1;
+      this.board[this.oldX][this.oldY].color = color2;
+      this.board[this.newX][this.newY].drawDiamond(this.ctx);
+      this.board[this.oldX][this.oldY].drawDiamond(this.ctx);
+
+      setTimeout(() => this.findMatches(), 100);
+    });
+  }
+
+  drawDiamonds(ctx) {
+    for (let j = 0; j < 7; j++) {
+      for (let i = 0; i < 7; i++) {
+        this.board[i][j].drawDiamond(ctx);
+      }
+    }
+  }
 }
 
 
@@ -350,7 +325,7 @@ class Diamond {
     this.rowIdx = rowIdx
     this.size = size;
     this.color = color;
-    this.exist = true;
+    // this.exist = true;
   }
 
   drawDiamond(ctx){
@@ -448,16 +423,24 @@ class Game {
 
 
   start(ctx){
-    this.board = new Board()
+    this.board = new Board(ctx)
     this.board.drawBoard(ctx);
     this.board.drawDiamonds(ctx);
-    this.draw()
+    // this.attachListener(this.board);
   }
 
   draw() {
-    this.board.drawDiamonds(this.ctx);    
-    requestAnimationFrame(this.draw.bind(this))
+    // this.board.drawDiamonds(this.ctx);    
+    // requestAnimationFrame(this.draw.bind(this))
   }
+
+  // attachListener(board) {
+  //   const body = document.getElementsByTagName('body')[0];
+  //   body.addEventListener('click', () => {
+  //     board.findMatches();
+  //     console.log(Object.assign(board));
+  //   })
+  // }
 }
 
 
