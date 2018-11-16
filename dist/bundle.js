@@ -204,6 +204,7 @@ class Board {
     }
     let nextDiamond = this.board[xNew][yNew];
     if (diamond.color === nextDiamond.color) {
+      // debugger
       return this.traverseDownRight(matches, explored, nextDiamond, dir, path);
     } else if (path.length > 2) {
       return matches.concat(path);
@@ -240,12 +241,14 @@ class Board {
         const xNew = diamond.rowIdx - 1;
         const yNew = diamond.colIdx;
         const nextDiamond = this.board[xNew][yNew];
+        // debugger
+        // this.board[xNew+1][yNew] = nextDiamond;
+        // diamond = nextDiamond;
         diamond.color = nextDiamond.color;
-
+        this.board[xNew + 1][yNew].drawDiamond(this.ctx);
         diamond.rowIdx -= 1;
-        diamond.drawDiamond(this.ctx);
       }
-      this.board[0][diamond.colIdx].color = this.randomColor();
+      // this.board[0][diamond.colIdx].color = this.randomColor();
       this.board[0][diamond.colIdx].drawDiamond(this.ctx);
     });
   }
@@ -283,6 +286,27 @@ class Board {
     canvasEl.addEventListener("mouseup", event => {
       this.newY = parseInt((event.offsetX - p) / 65);
       this.newX = parseInt((event.offsetY - 100) / 65);
+      const xDiff = this.newX - this.oldX;
+      const yDiff = this.newY - this.oldY;
+      if (!(Math.abs(xDiff)===1 && yDiff ===0)
+        && !(Math.abs(yDiff) === 1 && xDiff === 0))
+        {
+          alert("Invalid Moves!")
+      }
+      // debugger
+      // let temp1 = this.board[this.oldX][this.oldY];
+      // let temp2 = this.board[this.newX][this.newY];
+      // this.board[this.newX][this.newY] = temp1;
+      // this.board[this.oldX][this.oldY] = temp2;
+
+      // here we try to change position then change object but the color is still the same
+
+      // let [X, Y] = [this.oldX, this.oldY];
+      // [this.oldX, this.oldY] = [this.newX, this.newY]
+      // [this.newX, this.newY] = [X, Y];
+
+
+      // Change color => repaint works;
 
       let color1 = this.board[this.oldX][this.oldY].color;
       let color2 = this.board[this.newX][this.newY].color;
@@ -290,7 +314,7 @@ class Board {
       this.board[this.oldX][this.oldY].color = color2;
       this.board[this.newX][this.newY].drawDiamond(this.ctx);
       this.board[this.oldX][this.oldY].drawDiamond(this.ctx);
-
+      // The way we draw diamond is by giving property to this.board[x][y]
       setTimeout(() => this.findMatches(), 100);
     });
   }
@@ -328,6 +352,9 @@ class Diamond {
     // this.exist = true;
   }
 
+
+  // The way set up draw is based on ColIdx, RowIdx
+  // So it wont draw what we want on this.board[i][j]
   drawDiamond(ctx){
     ctx.beginPath();
     ctx.fillStyle = this.color;
