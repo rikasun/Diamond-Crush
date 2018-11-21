@@ -95,7 +95,6 @@
 
 const Diamond = __webpack_require__(/*! ./diamond */ "./lib/diamond.js");
 
-
 class Board {
   constructor(ctx) {
     this.board = Array.from(Array(7), () => new Array(7));
@@ -106,15 +105,6 @@ class Board {
     this.ctx = ctx;
     this.addDiamonds();
     this.attachEvent();
-  }
-
-  isMatch(diamond) {
-    const dirs = [[-1, 0], [0, -1]];
-    for (let i = 0; i < 2; i++) {
-      const match = this.traverseUpLeft(diamond, dirs[i], 1);
-      if (match) return true;
-    }
-    return false;
   }
 
   // When populating the board, ensure there are no matches
@@ -140,14 +130,31 @@ class Board {
   }
 
   addDiamonds() {
-    for (var j = 0; j < 7; j++) {
-      for (var i = 0; i < 7; i++) {
+    for (var i = 0; i < 7; i++) {
+      for (var j = 0; j < 7; j++) {
         let randColor = this.randomColor();
-        let diamond = new Diamond(j, i, 20, randColor);
-        this.board[i][j] = diamond;
+        let diamond = new Diamond(i, j, 20, randColor);
+        this.board[j][i] = diamond;
         while (this.isMatch(diamond)) {
           diamond.color = this.randomColor();
         }
+      }
+    }
+  }
+
+  isMatch(diamond) {
+    const dirs = [[-1, 0], [0, -1]];
+    for (let i = 0; i < 2; i++) {
+      const match = this.traverseUpLeft(diamond, dirs[i], 1);
+      if (match) return true;
+    }
+    return false;
+  }
+
+  drawDiamonds() {
+    for (let j = 0; j < 7; j++) {
+      for (let i = 0; i < 7; i++) {
+        this.board[i][j].drawDiamond(this.ctx);
       }
     }
   }
@@ -157,6 +164,7 @@ class Board {
     let matches = [];
     const explored = [];
     const dirs = [[1, 0], [0, 1]];
+
     for (let i = 0; i < 7; i++) {
       for (let j = 0; j < 7; j++) {
         let diamond = this.board[i][j];
@@ -182,6 +190,31 @@ class Board {
     // }
 
     this.shiftBoard(matches);
+  }
+
+  shiftBoard(matches) {
+    // debugger;
+    matches.forEach(diamond => {
+      let colIdx = diamond.colIdx;
+      let rowIdx = diamond.rowIdx;
+
+      while (rowIdx > 0) {
+        const nextDiamond = this.board[rowIdx - 1][colIdx];
+        // debugger;
+        // this.board[xNew+1][yNew] = nextDiamond;
+        // diamond = nextDiamond;
+        // diamond.color = nextDiamond.color;
+
+        this.board[rowIdx][colIdx] = nextDiamond;
+        nextDiamond.rowIdx = rowIdx;
+        nextDiamond.drawDiamond(this.ctx);
+        rowIdx = rowIdx - 1;
+      }
+      // this.board[0][diamond.colIdx].color = this.randomColor();
+      let newDiamond = new Diamond(colIdx, 0, 20, this.randomColor())
+      this.board[0][colIdx] = newDiamond;
+      newDiamond.drawDiamond(this.ctx);
+    });
   }
 
   traverseDownRight(matches, explored, diamond, dir, path = []) {
@@ -234,43 +267,24 @@ class Board {
   //   }
   // }
 
-  shiftBoard(matches) {
-    matches.forEach(diamond => {
-      // debugger;
-      while (diamond.rowIdx >= 1) {
-        const xNew = diamond.rowIdx - 1;
-        const yNew = diamond.colIdx;
-        const nextDiamond = this.board[xNew][yNew];
-        // debugger
-        // this.board[xNew+1][yNew] = nextDiamond;
-        // diamond = nextDiamond;
-        diamond.color = nextDiamond.color;
-        this.board[xNew + 1][yNew].drawDiamond(this.ctx);
-        diamond.rowIdx -= 1;
-      }
-      // this.board[0][diamond.colIdx].color = this.randomColor();
-      this.board[0][diamond.colIdx].drawDiamond(this.ctx);
-    });
-  }
-
-  drawBoard(ctx) {
+  drawBoard() {
     //length of a square
     const a = 65;
     //padding to the canvas
     const p = 400;
 
     for (var x = p; x <= 7 * a + p; x += a) {
-      ctx.moveTo(x, 100);
-      ctx.lineTo(x, 7 * a + 100);
+      this.ctx.moveTo(x, 100);
+      this.ctx.lineTo(x, 7 * a + 100);
     }
 
     for (var x = 100; x <= 7 * a + 100; x += a) {
-      ctx.moveTo(p, x);
-      ctx.lineTo(7 * a + p, x);
+      this.ctx.moveTo(p, x);
+      this.ctx.lineTo(7 * a + p, x);
     }
 
-    ctx.strokeStyle = "lightsteelblue";
-    ctx.stroke();
+    this.ctx.strokeStyle = "lightsteelblue";
+    this.ctx.stroke();
   }
 
   attachEvent() {
@@ -288,10 +302,27 @@ class Board {
       this.newX = parseInt((event.offsetY - 100) / 65);
       const xDiff = this.newX - this.oldX;
       const yDiff = this.newY - this.oldY;
-      if (!(Math.abs(xDiff)===1 && yDiff ===0)
-        && !(Math.abs(yDiff) === 1 && xDiff === 0))
-        {
-          alert("Invalid Moves!")
+      if (
+        !(Math.abs(xDiff) === 1 && yDiff === 0) &&
+        !(Math.abs(yDiff) === 1 && xDiff === 0)
+      ) {
+        alert("Invalid Moves!");
+      } else {
+        let diamond1 = this.board[this.oldX][this.oldY];
+        let diamond2 = this.board[this.newX][this.newY];
+
+        this.board[this.oldX][this.oldY] = diamond2;
+        this.board[this.newX][this.newY] = diamond1;
+
+        diamond1.rowIdx = this.newX;
+        diamond1.colIdx = this.newY;
+        diamond2.rowIdx = this.oldX;
+        diamond2.colIdx = this.oldY;
+
+        this.drawDiamonds();
+
+        // The way we draw diamond is by giving property to this.board[x][y]
+        setTimeout(() => this.findMatches(), 100);
       }
       // debugger
       // let temp1 = this.board[this.oldX][this.oldY];
@@ -305,26 +336,8 @@ class Board {
       // [this.oldX, this.oldY] = [this.newX, this.newY]
       // [this.newX, this.newY] = [X, Y];
 
-
       // Change color => repaint works;
-
-      let color1 = this.board[this.oldX][this.oldY].color;
-      let color2 = this.board[this.newX][this.newY].color;
-      this.board[this.newX][this.newY].color = color1;
-      this.board[this.oldX][this.oldY].color = color2;
-      this.board[this.newX][this.newY].drawDiamond(this.ctx);
-      this.board[this.oldX][this.oldY].drawDiamond(this.ctx);
-      // The way we draw diamond is by giving property to this.board[x][y]
-      setTimeout(() => this.findMatches(), 100);
     });
-  }
-
-  drawDiamonds(ctx) {
-    for (let j = 0; j < 7; j++) {
-      for (let i = 0; i < 7; i++) {
-        this.board[i][j].drawDiamond(ctx);
-      }
-    }
   }
 }
 
@@ -343,8 +356,6 @@ module.exports = Board;
 class Diamond {
 
   constructor(colIdx, rowIdx, size, color){
-    this.x = colIdx * 65 + 432.5 ; 
-    this.y = rowIdx * 65 + 132.5;
     this.colIdx = colIdx;
     this.rowIdx = rowIdx
     this.size = size;
@@ -356,9 +367,11 @@ class Diamond {
   // The way set up draw is based on ColIdx, RowIdx
   // So it wont draw what we want on this.board[i][j]
   drawDiamond(ctx){
+    const x = this.colIdx * 65 + 432.5;
+    const y = this.rowIdx * 65 + 132.5;
     ctx.beginPath();
     ctx.fillStyle = this.color;
-    ctx.arc(this.x, this.y, this.size, 0, 2 * Math.PI);
+    ctx.arc(x, y, this.size, 0, 2 * Math.PI);
     ctx.fill();
   }
 
@@ -451,8 +464,8 @@ class Game {
 
   start(ctx){
     this.board = new Board(ctx)
-    this.board.drawBoard(ctx);
-    this.board.drawDiamonds(ctx);
+    this.board.drawBoard();
+    this.board.drawDiamonds();
     // this.attachListener(this.board);
   }
 
