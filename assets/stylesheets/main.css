@@ -57,6 +57,18 @@ a {
     -webkit-transition: opacity 350ms linear 0s;
 }
 
+#points {
+  font-family: 'Special Elite', cursive;
+  position: absolute;
+  top: 200px;
+  left: 110px;
+  height: 200px;
+  width: 200px;
+  z-index: 2;
+  color: white;
+  font-size: 95px;
+}
+
 .half_opacity {
     opacity:0.5;
 }

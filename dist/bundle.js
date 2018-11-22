@@ -104,8 +104,11 @@ class Board {
     this.newY = 0;
     this.ctx = ctx;
     this.addDiamonds();
-    this.addTouchEvent();
+    // this.addTouchEvent();
     this.attachEvent();
+    this.score = 0;
+    this.points = document.getElementById('points');
+    this.points.textContent = this.score;
   }
 
   // When populating the board, ensure there are no matches
@@ -301,69 +304,72 @@ class Board {
         }
 
         this.drawDiamonds()
+        this.score += 100;
+        this.points = document.getElementById('points');
+        this.points.textContent = this.score;
         // setTimeout(() => this.findMatches(), 100);
       }
     });
   }
 
 
-  addTouchEvent() {
-    const canvasEl = document.getElementsByTagName("canvas")[0];
-    const p = 400;
+  // addTouchEvent() {
+  //   const canvasEl = document.getElementsByTagName("canvas")[0];
+  //   const p = 400;
 
-    canvasEl.addEventListener("touchstart", event => {
-      this.oldY = parseInt((event.offsetX - p) / 65);
-      this.oldX = parseInt((event.offsetY - p / 4) / 65);
-    }, false);
+  //   canvasEl.addEventListener("touchstart", event => {
+  //     this.oldY = parseInt((event.offsetX - p) / 65);
+  //     this.oldX = parseInt((event.offsetY - p / 4) / 65);
+  //   }, false);
 
-    canvasEl.addEventListener("touchmove", function(event) {
-        event.preventDefault();
-      }, false); 
+  //   canvasEl.addEventListener("touchmove", function(event) {
+  //       event.preventDefault();
+  //     }, false); 
 
-    canvasEl.addEventListener("touchend", event => {
-      event.preventDefault();
-      this.newY = parseInt((event.offsetX - p) / 65);
-      this.newX = parseInt((event.offsetY - p / 4) / 65);
-      const xDiff = this.newX - this.oldX;
-      const yDiff = this.newY - this.oldY;
-      if (
-        !(Math.abs(xDiff) === 1 && yDiff === 0) &&
-        !(Math.abs(yDiff) === 1 && xDiff === 0)
-      ) {
-        alert("Invalid Moves!");
-      } else {
-        // Need to add another logic to make sure there is matches
-        let diamond1 = this.board[this.oldX][this.oldY];
-        let diamond2 = this.board[this.newX][this.newY];
+  //   canvasEl.addEventListener("touchend", event => {
+  //     event.preventDefault();
+  //     this.newY = parseInt((event.offsetX - p) / 65);
+  //     this.newX = parseInt((event.offsetY - p / 4) / 65);
+  //     const xDiff = this.newX - this.oldX;
+  //     const yDiff = this.newY - this.oldY;
+  //     if (
+  //       !(Math.abs(xDiff) === 1 && yDiff === 0) &&
+  //       !(Math.abs(yDiff) === 1 && xDiff === 0)
+  //     ) {
+  //       alert("Invalid Moves!");
+  //     } else {
+  //       // Need to add another logic to make sure there is matches
+  //       let diamond1 = this.board[this.oldX][this.oldY];
+  //       let diamond2 = this.board[this.newX][this.newY];
 
-        this.board[this.oldX][this.oldY] = diamond2;
-        this.board[this.newX][this.newY] = diamond1;
+  //       this.board[this.oldX][this.oldY] = diamond2;
+  //       this.board[this.newX][this.newY] = diamond1;
 
-        diamond1.rowIdx = this.newX;
-        diamond1.colIdx = this.newY;
-        diamond2.rowIdx = this.oldX;
-        diamond2.colIdx = this.oldY;
+  //       diamond1.rowIdx = this.newX;
+  //       diamond1.colIdx = this.newY;
+  //       diamond2.rowIdx = this.oldX;
+  //       diamond2.colIdx = this.oldY;
 
-        this.drawDiamonds();
-        // this.findMatches();
-        let noMatchLeft = false;
-        while (!noMatchLeft) {
-          for (let i = 0; i < 7; i++) {
-            for (let j = 0; j < 7; j++) {
-              noMatchLeft = true;
-              if (this.isMatch(this.board[j][i])) {
-                this.findMatches();
-                noMatchLeft = false;
-              }
-            }
-          }
-        }
+  //       this.drawDiamonds();
+  //       // this.findMatches();
+  //       let noMatchLeft = false;
+  //       while (!noMatchLeft) {
+  //         for (let i = 0; i < 7; i++) {
+  //           for (let j = 0; j < 7; j++) {
+  //             noMatchLeft = true;
+  //             if (this.isMatch(this.board[j][i])) {
+  //               this.findMatches();
+  //               noMatchLeft = false;
+  //             }
+  //           }
+  //         }
+  //       }
 
-        this.drawDiamonds()
-        // setTimeout(() => this.findMatches(), 100);
-      }
-    }, false);
-  }
+  //       this.drawDiamonds()
+  //       // setTimeout(() => this.findMatches(), 100);
+  //     }
+  //   }, false);
+  // }
 }
 
 
@@ -487,7 +493,13 @@ class Game {
     this.board = new Board(ctx);
     this.board.drawBoard();
     this.board.drawDiamonds();
-    }
+
+    // if (this.board.points >=3000) {
+    //   alert('you win!')
+    // } else {
+    //   alert('you lose!')
+    // }
+  }
       // this.attachListener(this.board);
    
 
@@ -547,7 +559,7 @@ document.addEventListener("DOMContentLoaded", () => {
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-
+// const Board = require("./board");
 class Timer {
   constructor(ctx){
     this.ctx = ctx;
@@ -624,10 +636,11 @@ class Timer {
   }
   
   
-  // Time up - reset buttons
+  
    timeUp(){
      this.clock.style.display='none'
      this.timer.style.display='none'
+  
     //  alert('Time is up!')
   }
 
