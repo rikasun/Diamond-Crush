@@ -94,8 +94,7 @@
 /***/ (function(module, exports, __webpack_require__) {
 
 const Diamond = __webpack_require__(/*! ./diamond */ "./lib/diamond.js");
-// colIdx是横着的一个一个
-// rowIdx是竖着的一个一个 this.board[row][col] => this.board[x][y]
+
 class Board {
   constructor(ctx) {
     this.board = Array.from(Array(7), () => new Array(7));
@@ -105,6 +104,7 @@ class Board {
     this.newY = 0;
     this.ctx = ctx;
     this.addDiamonds();
+    this.addTouchEvent();
     this.attachEvent();
   }
 
@@ -192,17 +192,12 @@ class Board {
       let rowIdx = diamond.rowIdx;
 
       while (rowIdx > 0) {
-        // assume [4][3]
+      
         const nextDiamond = this.board[rowIdx - 1][colIdx];
-        // nextDia this.board[3][3]
         this.board[rowIdx][colIdx] = nextDiamond;
-        // this.board[4][3] becomes[3][3]
         nextDiamond.rowIdx = rowIdx;
-          // let nextdiamond 的 row 变成[4][3]
         nextDiamond.drawDiamond(this.ctx);
-        // this.board[4][3]画一个
         rowIdx = rowIdx - 1;
-        //rowidx 画一个
       }
      
       let newDiamond = new Diamond(colIdx, 0, 20, this.randomColor())
@@ -309,6 +304,65 @@ class Board {
         // setTimeout(() => this.findMatches(), 100);
       }
     });
+  }
+
+
+  addTouchEvent() {
+    const canvasEl = document.getElementsByTagName("canvas")[0];
+    const p = 400;
+
+    canvasEl.addEventListener("touchstart", event => {
+      this.oldY = parseInt((event.offsetX - p) / 65);
+      this.oldX = parseInt((event.offsetY - p / 4) / 65);
+    }, false);
+
+    canvasEl.addEventListener("touchmove", function(event) {
+        event.preventDefault();
+      }, false); 
+
+    canvasEl.addEventListener("touchend", event => {
+      event.preventDefault();
+      this.newY = parseInt((event.offsetX - p) / 65);
+      this.newX = parseInt((event.offsetY - p / 4) / 65);
+      const xDiff = this.newX - this.oldX;
+      const yDiff = this.newY - this.oldY;
+      if (
+        !(Math.abs(xDiff) === 1 && yDiff === 0) &&
+        !(Math.abs(yDiff) === 1 && xDiff === 0)
+      ) {
+        alert("Invalid Moves!");
+      } else {
+        // Need to add another logic to make sure there is matches
+        let diamond1 = this.board[this.oldX][this.oldY];
+        let diamond2 = this.board[this.newX][this.newY];
+
+        this.board[this.oldX][this.oldY] = diamond2;
+        this.board[this.newX][this.newY] = diamond1;
+
+        diamond1.rowIdx = this.newX;
+        diamond1.colIdx = this.newY;
+        diamond2.rowIdx = this.oldX;
+        diamond2.colIdx = this.oldY;
+
+        this.drawDiamonds();
+        // this.findMatches();
+        let noMatchLeft = false;
+        while (!noMatchLeft) {
+          for (let i = 0; i < 7; i++) {
+            for (let j = 0; j < 7; j++) {
+              noMatchLeft = true;
+              if (this.isMatch(this.board[j][i])) {
+                this.findMatches();
+                noMatchLeft = false;
+              }
+            }
+          }
+        }
+
+        this.drawDiamonds()
+        // setTimeout(() => this.findMatches(), 100);
+      }
+    }, false);
   }
 }
 
@@ -565,7 +619,7 @@ class Timer {
     if (window.intOffset <= 0) // If time is up
      {this.timeUp()}
     else {
-      setTimeout("this.countDownClock(" + dateStart + "," + 60000 + ")", 50);
+      // setTimeout("this.countDownClock(" + dateStart + "," + 60000 + ")", 50);
     }
   }
   
