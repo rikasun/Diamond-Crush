@@ -15,3 +15,48 @@ body {
     #6365bb
   );
 }
+
+a {
+    color: #4e00cf;
+    font-size: 175%;
+    text-decoration: none;
+    position: absolute;
+    top: 340px;
+    display: block;
+    width: 350px;
+    text-align: center;
+    color: #000;
+}
+
+#clock_wrapper {
+    position: absolute;
+    top: 20em;
+    left: 5em;
+}
+
+#clock {
+    position: relative;
+    z-index: 1;
+    width: 300px;
+    height: 300px;
+}
+
+#timer {
+  font-family: 'Special Elite', cursive;
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 700%;
+    text-align: center;
+    width: 200px;
+    z-index: 2;
+    padding-top: 25%;
+    padding-left:5%;
+    color: #000;
+    transition: opacity 350ms linear 0s;
+    -webkit-transition: opacity 350ms linear 0s;
+}
+
+.half_opacity {
+    opacity:0.5;
+}

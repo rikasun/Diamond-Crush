@@ -94,7 +94,8 @@
 /***/ (function(module, exports, __webpack_require__) {
 
 const Diamond = __webpack_require__(/*! ./diamond */ "./lib/diamond.js");
-
+// colIdx是横着的一个一个
+// rowIdx是竖着的一个一个 this.board[row][col] => this.board[x][y]
 class Board {
   constructor(ctx) {
     this.board = Array.from(Array(7), () => new Array(7));
@@ -109,7 +110,6 @@ class Board {
 
   // When populating the board, ensure there are no matches
   traverseUpLeft(diamond, dir, count) {
-    // debugger
     if (count === 3) return true;
     const xNew = diamond.rowIdx + dir[0];
     const yNew = diamond.colIdx + dir[1];
@@ -144,17 +144,17 @@ class Board {
 
   isMatch(diamond) {
     const dirs = [[-1, 0], [0, -1]];
-    for (let i = 0; i < 2; i++) {
-      const match = this.traverseUpLeft(diamond, dirs[i], 1);
+    for (let d = 0; d < 2; d++) {
+      const match = this.traverseUpLeft(diamond, dirs[d], 1);
       if (match) return true;
     }
     return false;
   }
 
   drawDiamonds() {
-    for (let j = 0; j < 7; j++) {
-      for (let i = 0; i < 7; i++) {
-        this.board[i][j].drawDiamond(this.ctx);
+    for (let i = 0; i < 7; i++) {
+      for (let j = 0; j < 7; j++) {
+        this.board[j][i].drawDiamond(this.ctx);
       }
     }
   }
@@ -167,7 +167,7 @@ class Board {
 
     for (let i = 0; i < 7; i++) {
       for (let j = 0; j < 7; j++) {
-        let diamond = this.board[i][j];
+        let diamond = this.board[j][i];
         if (!explored.includes(diamond)) {
           for (let d = 0; d < 2; d++) {
             matches = this.traverseDownRight(
@@ -182,13 +182,6 @@ class Board {
     }
 
     // console.log(matches);
-
-    // for (let m = 0; m < matches.length; m++) {
-    //   matches[m].color = "black";
-    //   matches[m].exist = false;
-    //   matches[m].drawDiamond(this.ctx);
-    // }
-
     this.shiftBoard(matches);
   }
 
@@ -199,18 +192,19 @@ class Board {
       let rowIdx = diamond.rowIdx;
 
       while (rowIdx > 0) {
+        // assume [4][3]
         const nextDiamond = this.board[rowIdx - 1][colIdx];
-        // debugger;
-        // this.board[xNew+1][yNew] = nextDiamond;
-        // diamond = nextDiamond;
-        // diamond.color = nextDiamond.color;
-
+        // nextDia this.board[3][3]
         this.board[rowIdx][colIdx] = nextDiamond;
+        // this.board[4][3] becomes[3][3]
         nextDiamond.rowIdx = rowIdx;
+          // let nextdiamond 的 row 变成[4][3]
         nextDiamond.drawDiamond(this.ctx);
+        // this.board[4][3]画一个
         rowIdx = rowIdx - 1;
+        //rowidx 画一个
       }
-      // this.board[0][diamond.colIdx].color = this.randomColor();
+     
       let newDiamond = new Diamond(colIdx, 0, 20, this.randomColor())
       this.board[0][colIdx] = newDiamond;
       newDiamond.drawDiamond(this.ctx);
@@ -222,11 +216,9 @@ class Board {
     explored.push(diamond);
     path.push(diamond);
     if (path.length > 2) {
-      // console.log(path);
     }
     const xNew = diamond.rowIdx + dir[0];
     const yNew = diamond.colIdx + dir[1];
-    // debugger
 
     if (xNew > 6 || yNew > 6) {
       if (path.length > 2) {
@@ -245,27 +237,6 @@ class Board {
       return matches;
     }
   }
-
-  // shiftBoard() {
-  //   // debugger
-  //   for (let i = 0; i < 7; i++) {
-  //     for (let j = 0; j < 7; j++) {
-  //       let diamond = this.board[i][j];
-  //       if (diamond.exist === false) {
-  //         // debugger
-  //         while (diamond.rowIdx >= 1) {
-  //           const xNew = diamond.rowIdx - 1;
-  //           const yNew = diamond.colIdx;
-  //           const nextDiamond = this.board[xNew][yNew];
-  //           diamond.color = nextDiamond.color;
-  //           diamond.exist = true;
-  //           diamond.rowIdx -= 1;
-  //         }
-  //         this.board[0][j].color = this.randomColor();
-  //       }
-  //     }
-  //   }
-  // }
 
   drawBoard() {
     //length of a square
@@ -289,17 +260,16 @@ class Board {
 
   attachEvent() {
     const canvasEl = document.getElementsByTagName("canvas")[0];
-    // const ctx = canvasEl.getContext("2d");
     const p = 400;
 
     canvasEl.addEventListener("mousedown", event => {
       this.oldY = parseInt((event.offsetX - p) / 65);
-      this.oldX = parseInt((event.offsetY - 100) / 65);
+      this.oldX = parseInt((event.offsetY - p/4) / 65);
     });
 
     canvasEl.addEventListener("mouseup", event => {
       this.newY = parseInt((event.offsetX - p) / 65);
-      this.newX = parseInt((event.offsetY - 100) / 65);
+      this.newX = parseInt((event.offsetY - p/4) / 65);
       const xDiff = this.newX - this.oldX;
       const yDiff = this.newY - this.oldY;
       if (
@@ -308,6 +278,7 @@ class Board {
       ) {
         alert("Invalid Moves!");
       } else {
+        // Need to add another logic to make sure there is matches
         let diamond1 = this.board[this.oldX][this.oldY];
         let diamond2 = this.board[this.newX][this.newY];
 
@@ -320,23 +291,23 @@ class Board {
         diamond2.colIdx = this.oldY;
 
         this.drawDiamonds();
+        // this.findMatches();
+        let noMatchLeft = false;
+        while (!noMatchLeft) {   
+          for (let i = 0; i < 7; i++) {
+            for (let j = 0; j < 7; j++) {
+              noMatchLeft = true;
+               if (this.isMatch(this.board[j][i])){
+                this.findMatches();
+                noMatchLeft = false;
+              }
+            }
+          }
+        }
 
-        // The way we draw diamond is by giving property to this.board[x][y]
-        setTimeout(() => this.findMatches(), 100);
+        this.drawDiamonds()
+        // setTimeout(() => this.findMatches(), 100);
       }
-      // debugger
-      // let temp1 = this.board[this.oldX][this.oldY];
-      // let temp2 = this.board[this.newX][this.newY];
-      // this.board[this.newX][this.newY] = temp1;
-      // this.board[this.oldX][this.oldY] = temp2;
-
-      // here we try to change position then change object but the color is still the same
-
-      // let [X, Y] = [this.oldX, this.oldY];
-      // [this.oldX, this.oldY] = [this.newX, this.newY]
-      // [this.newX, this.newY] = [X, Y];
-
-      // Change color => repaint works;
     });
   }
 }
@@ -360,12 +331,8 @@ class Diamond {
     this.rowIdx = rowIdx
     this.size = size;
     this.color = color;
-    // this.exist = true;
   }
 
-
-  // The way set up draw is based on ColIdx, RowIdx
-  // So it wont draw what we want on this.board[i][j]
   drawDiamond(ctx){
     const x = this.colIdx * 65 + 432.5;
     const y = this.rowIdx * 65 + 132.5;
@@ -453,7 +420,7 @@ module.exports = Diamond
 /***/ (function(module, exports, __webpack_require__) {
 
 const Board = __webpack_require__(/*! ./board */ "./lib/board.js");
-const Diamond = __webpack_require__(/*! ./diamond */ "./lib/diamond.js");
+const Timer = __webpack_require__(/*! ./timer */ "./lib/timer.js");
 
 
 class Game {
@@ -463,11 +430,12 @@ class Game {
 
 
   start(ctx){
-    this.board = new Board(ctx)
+    this.board = new Board(ctx);
     this.board.drawBoard();
     this.board.drawDiamonds();
-    // this.attachListener(this.board);
-  }
+    }
+      // this.attachListener(this.board);
+   
 
   draw() {
     // this.board.drawDiamonds(this.ctx);    
@@ -496,19 +464,122 @@ module.exports = Game;
 /***/ (function(module, exports, __webpack_require__) {
 
 const Game = __webpack_require__(/*! ./game */ "./lib/game.js")
+const Timer = __webpack_require__(/*! ./timer */ "./lib/timer.js")
 
 document.addEventListener("DOMContentLoaded", () => {
   console.log("Webpack is working")
   const canvasEl = document.getElementsByTagName("canvas")[0];
+  const canvasEl1 = document.getElementsByTagName("canvas")[1];
   const width = canvasEl.width = window.innerWidth;
   const height = canvasEl.height = window.innerHeight;
   const ctx = canvasEl.getContext("2d");
+  const ctx1 = canvasEl1.getContext("2d");
   
   const game = new Game(ctx);
+  const timer = new Timer(ctx1)
   game.start(ctx);
+  timer.beginTimer()
 
 });
 
+
+
+/***/ }),
+
+/***/ "./lib/timer.js":
+/*!**********************!*\
+  !*** ./lib/timer.js ***!
+  \**********************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+
+class Timer {
+  constructor(ctx){
+    this.ctx = ctx;
+    this.clock = document.getElementById('clock');
+    this.timer = document.getElementById('timer');
+  }
+  
+
+  colourChanger(intAngle) {
+   // RGB values
+   // Green: 	 51 153  0
+   // Orange:	244 138  0
+   // Red:		255   0  0
+   intAngle = 6.29 - intAngle;
+  
+   if (Math.floor(72 + 55 * intAngle) < 255 || Math.floor(214 + 14 * intAngle) < 255) {
+     return 'rgb(' + Math.floor(72 + 55 * intAngle) + ',' + Math.floor(214 + 14 * intAngle) + ',0)';
+   } else {
+     return 'rgb(' + Math.floor(255) + ',' + Math.floor(597 - (90 * intAngle)) + ',0)';
+   }
+  }
+  
+  
+  beginTimer() {
+   var dateStart = new Date();
+   dateStart = dateStart.getTime(); 
+   window.setInterval(() => this.countDownClock(dateStart, 60000), 500);
+  }
+  
+  countDownClock(dateStart, timer) {
+
+  this.timer = document.getElementById('timer')
+  
+   var d = new Date();
+ 
+   window.intOffset = timer - (d.getTime() - dateStart);
+
+   this.timer.textContent = (Math.ceil(window.intOffset / 1000));
+
+   window.intAngle = 0.1048335 * 0.001 * window.intOffset;
+
+   this.ctx.clearRect(0, 0, 400, 400);
+
+   // Grey background ring
+   this.ctx.beginPath();
+   this.ctx.globalAlpha = 1;
+   this.ctx.arc(150, 150, 140, 0, 6.283, false);
+   this.ctx.arc(150, 150, 105, 6.283, ((Math.PI * 2)), true);
+   this.ctx.fillStyle = "#bbb";
+   this.ctx.fill();
+   this.ctx.closePath();
+
+   // Clock face ring
+   this.ctx.beginPath();
+   this.ctx.globalAlpha = 1;
+   this.ctx.arc(150, 150, 140.1, -1.57, (-1.57 + window.intAngle), false);
+   this.ctx.arc(150, 150, 105, (-1.57 + window.intAngle), ((Math.PI * 2) - 1.57), true);
+   this.ctx.fillStyle = this.colourChanger(window.intAngle);
+   this.ctx.fill();
+   this.ctx.closePath();
+
+   // Centre circle
+   this.ctx.beginPath();
+   this.ctx.arc(150, 150, 105, 0, 6.283, false);
+   this.ctx.fillStyle = "#fff";
+   this.ctx.fill();
+   this.ctx.closePath();
+
+    if (window.intOffset <= 0) // If time is up
+     {this.timeUp()}
+    else {
+      setTimeout("this.countDownClock(" + dateStart + "," + 60000 + ")", 50);
+    }
+  }
+  
+  
+  // Time up - reset buttons
+   timeUp(){
+     this.clock.style.display='none'
+     this.timer.style.display='none'
+    //  alert('Time is up!')
+  }
+
+}
+
+module.exports = Timer;
 
 
 /***/ })
